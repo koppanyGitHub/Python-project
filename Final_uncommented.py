@@ -400,12 +400,8 @@ class PaintApplication:
         if self.old_x and self.old_y:
             self.draw.line([(self.old_x, self.old_y), (e.x, e.y)], fill=self.im_color_fg, width=int(float(self.penwidth)))
             self.render_label()
-            #self.c.create_line(self.old_x, self.old_y, e.x, e.y, width=self.penwidth,
-            #                   fill=self.color_fg, capstyle=ROUND, smooth=True)
         self.old_x = e.x
         self.old_y = e.y
-
-
 
     def reset(self, e):
         self.old_x = None
@@ -430,25 +426,10 @@ class PaintApplication:
             self.color_fg = 'white'
             self.im_color_fg = "#ffffff"
 
-#    def change_bg(self):
-#        self.color_bg = colorchooser.askcolor(color=self.color_bg)[1]
-
-    #def loadImage(self, photoImage):
-    #    self.gif1 = photoImage  # a CurrentPrediction kell
-
     def saveImage(self):
-        #x1 = self.c.winfo_rootx()
-        #y1 = self.c.winfo_rooty()
-        #x2 = x1 + self.c.winfo_width()
-        #y2 = y1 + self.c.winfo_height()
         newImageName= self.CurrentImageName.split("g",1)[0] +"g_new_groundtruth"+self.CurrentImageName.split("g",1)[1]
         print(newImageName)
-        #ImageGrab.grab().crop((x1, y1, x2, y2)).save(newImageName) #j.save("C:/Users/User/Desktop/mesh_trans",".bmp"), így kell kimenteni egy adott helyre
-        ##cv2.imwrite(os.path.join("C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\\",'mit.tif'),self.gif1)
-        ##cv2.waitKey(0)
         self.Im_current_label.save(self.TrainingMaskDirectory+newImageName)
-
-
 
     def drawWidgets(self):
         self.controls = Frame(self.master, padx=5, pady=5)
@@ -461,15 +442,11 @@ class PaintApplication:
         self.slider.grid(row=0, column=1, ipadx=30)
         self.controls.pack(side=LEFT)
 
-
-        self.c = Canvas(self.master, width=self.gif1.width(), height=self.gif1.height(), bg=self.color_bg, ) #itt fontos, hogy a height és a width a képhez legyen igazítva
-        ##self.c2 = Canvas(self.master, width=self.gif1.width(), height=self.gif1.height(), bg=self.color_bg, )
+        self.c = Canvas(self.master, width=self.gif1.width(), height=self.gif1.height(), bg=self.color_bg, )
         self.c.pack(fill=BOTH, expand=True)
-        ##self.c2.pack(fill=BOTH, expand=True)
         self.draw = ImageDraw.Draw(self.Im_current_label)
 
-        self.render_label() #itt töltöm be az image-et a háttérre
-        ##self.c2.create_image(0, 0, image=self.input, anchor=NW)  # itt töltöm be az image-et a háttérre
+        self.render_label() #loading the image to the background
 
         menu = Menu(self.master)
         self.master.config(menu=menu)
