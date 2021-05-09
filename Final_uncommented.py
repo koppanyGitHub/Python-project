@@ -396,29 +396,29 @@ class PaintApplication:
             Image.fromarray(self.__MaskOnImage(np.array(self.im_input), np.array(self.Im_current_label))))
         self.c.create_image(0, 0, image=self.Tk_current_img, anchor=NW)
 
-    def paint(self, e):
+    def paint(self, e): #the function that draws out the lines, based on mouse movements
         if self.old_x and self.old_y:
             self.draw.line([(self.old_x, self.old_y), (e.x, e.y)], fill=self.im_color_fg, width=int(float(self.penwidth)))
             self.render_label()
         self.old_x = e.x
         self.old_y = e.y
 
-    def reset(self, e):
+    def reset(self, e): #resetting the coordinates
         self.old_x = None
         self.old_y = None
 
-    def changew(self, e):
+    def changew(self, e): #changing the width of the pencil
         self.penwidth = e
 
-    def clear(self):
+    def clear(self): #clear the drawings from the canvas
         self.Im_current_label = self.im_img
         self.draw = ImageDraw.Draw(self.Im_current_label)
         self.render_label()
 
-    def change_fg(self):
+    def change_fg(self): #changing the foreground (colour of the pencil) of the image
         self.color_fg = colorchooser.askcolor(color=self.color_fg)[1]
 
-    def eraser(self):
+    def eraser(self): #eraser, changing the foreground's colour to the background's
         if (self.var1.get() == 1):
             self.color_fg = 'black'
             self.im_color_fg = "#000000"
@@ -426,12 +426,12 @@ class PaintApplication:
             self.color_fg = 'white'
             self.im_color_fg = "#ffffff"
 
-    def saveImage(self):
+    def saveImage(self): #saving the image from the canvas
         newImageName= self.CurrentImageName.split("g",1)[0] +"g_new_groundtruth"+self.CurrentImageName.split("g",1)[1]
         print(newImageName)
         self.Im_current_label.save(self.TrainingMaskDirectory+newImageName)
 
-    def drawWidgets(self):
+    def drawWidgets(self): #creating the actual widgets of the application, associating them with the created functions
         self.controls = Frame(self.master, padx=5, pady=5)
         Label(self.controls, text="Penwidth", font=('arial 16')).grid(row=0, column=0)
         self.var1 = IntVar()
