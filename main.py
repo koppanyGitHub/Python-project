@@ -33,6 +33,9 @@ from tkinter import *
 from PIL import ImageTk, Image
 import os
 
+from tkinter import ttk, colorchooser
+from PIL import ImageGrab, ImageTk, Image
+
 
 ############################# CODE
 
@@ -255,10 +258,12 @@ class ImageViewer(Frame):
         self.ButtonBack = Button(master, command=self.ButtonBackClick, text="Back")
         self.ButtonExit = Button(master, command=master.quit, text="Exit")
         self.ButtonForward = Button(master, command=self.ButtonForwardClick, text="Forward")
+        self.ButtonPainter = Button(master, command=self.CallPainter, text="Modifie label")
 
         self.ButtonBack.grid(row=5, column=0)
         self.ButtonExit.grid(row=5, column=1)
         self.ButtonForward.grid(row=5, column=2)
+        self.ButtonPainter.grid(row=5,column=3)
 
         self.canvas1 = Canvas(master, width=300, height=300)
         self.canvas1.grid(row=1, column=0, columnspan=3)
@@ -332,6 +337,103 @@ class ImageViewer(Frame):
         self.canvas2.create_image(20, 20, anchor="nw", image=self.TKCurrentPrediction)
         self.canvas3.create_image(20, 20, anchor="nw", image=self.TKCurrentPredictionOnInput)
 
+    def CallPainter(self):
+        P_App = PaintApplication(self.TKCurrentInput,self.TKCurrentPrediction)
+        root.title('Paint Application')
+
+
+
+class PaintApplication:
+    def __init__(self, input, gif1):
+        self.input = input
+        self.gif1 = gif1
+        self.master = Toplevel()
+        self.color_fg = 'white'
+        self.color_bg = 'black'
+        self.old_x = None
+        self.old_y = None
+        self.penwidth = 4
+        self.drawWidgets()
+        self.c.bind('<B1-Motion>', self.paint)
+        self.c.bind('<ButtonRelease-1>', self.reset)
+
+
+    def paint(self, e):
+        if self.old_x and self.old_y:
+            self.c.create_line(self.old_x, self.old_y, e.x, e.y, width=self.penwidth,
+                               fill=self.color_fg, capstyle=ROUND, smooth=True)
+        self.old_x = e.x
+        self.old_y = e.y
+
+
+
+    def reset(self, e):
+        self.old_x = None
+        self.old_y = None
+
+    def changew(self, e):
+        self.penwidth = e
+
+    def clear(self):
+        self.c.delete(ALL)
+        self.c.create_image(0, 0, image=self.gif1, anchor=NW)
+
+    def change_fg(self):
+        self.color_fg = colorchooser.askcolor(color=self.color_fg)[1]
+
+    def eraser(self):
+        if (self.var1.get() == 1):
+            self.color_fg = 'black'
+        else:
+            self.color_fg = 'white'
+
+#    def change_bg(self):
+#        self.color_bg = colorchooser.askcolor(color=self.color_bg)[1]
+
+    def loadImage(self, photoImage):
+        self.gif1 = photoImage  # a CurrentPrediction kell
+
+    def saveImage(self):
+        x1 = self.c.winfo_rootx()
+        y1 = self.c.winfo_rooty()
+        x2 = x1 + self.c.winfo_width()
+        y2 = y1 + self.c.winfo_height()
+        ImageName= "mitochondriag_01.tif"
+        newImageName= ImageName.split("g",1)[0] +"_groundtruth"+ImageName.split("g",1)[1]
+        print(newImageName)
+        ImageGrab.grab().crop((x1, y1, x2, y2)).save(newImageName) #j.save("C:/Users/User/Desktop/mesh_trans",".bmp"), így kell kimenteni egy adott helyre
+        ##cv2.imwrite(os.path.join("C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\\",'mit.tif'),self.gif1)
+        ##cv2.waitKey(0)
+
+
+
+    def drawWidgets(self):
+        self.controls = Frame(self.master, padx=5, pady=5)
+        Label(self.controls, text="Penwidth", font=('arial 16')).grid(row=0, column=0)
+        self.var1 = IntVar()
+        self.cb = Checkbutton(self.controls, text='Erase', font=('arial 16'), variable=self.var1, onvalue=1, offvalue=0,
+                              command=self.eraser).grid(row=5, column=0)
+        self.slider = ttk.Scale(self.controls, from_=4, to=15, command=self.changew, orient=HORIZONTAL)
+        self.slider.set(self.penwidth)
+        self.slider.grid(row=0, column=1, ipadx=30)
+        self.controls.pack(side=LEFT)
+
+
+        self.c = Canvas(self.master, width=self.gif1.width(), height=self.gif1.height(), bg=self.color_bg, ) #itt fontos, hogy a height és a width a képhez legyen igazítva
+        ##self.c2 = Canvas(self.master, width=self.gif1.width(), height=self.gif1.height(), bg=self.color_bg, )
+        self.c.pack(fill=BOTH, expand=True)
+        ##self.c2.pack(fill=BOTH, expand=True)
+
+        self.c.create_image(0, 0, image=self.gif1, anchor = NW) #itt töltöm be az image-et a háttérre
+        ##self.c2.create_image(0, 0, image=self.input, anchor=NW)  # itt töltöm be az image-et a háttérre
+
+        menu = Menu(self.master)
+        self.master.config(menu=menu)
+        optionmenu = Menu(menu)
+        menu.add_cascade(label='Options', menu=optionmenu)
+        optionmenu.add_command(label='Clear Canvas', command=self.clear)
+        optionmenu.add_command(label='Save Image', command=self.saveImage)
+
 
 
 ##############################
@@ -341,6 +443,7 @@ TrainingImageDirectory = 'C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\
 TrainingMaskDirectory = 'C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\\TrainingData\\masks\\'
 UnetWeights50 = 'C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\\NNVersions\\mitochondria_test_50_epochs.hdf5'
 RawDataPath = "C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\\RawData\\"
+Directory="C:\\Users\\Thinkpad\\Desktop\\Python_Project\\verzio1\\"
 
 root = Tk()
 ImgViewer1 = ImageViewer(root, TrainingImageDirectory, TrainingMaskDirectory, UnetWeights50, RawDataPath)
